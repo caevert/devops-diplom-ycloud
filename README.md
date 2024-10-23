@@ -384,10 +384,10 @@ kubectl get pods -l app=nginx-static
 2. Если на первом этапе вы не воспользовались [Terraform Cloud](https://app.terraform.io/), то задеплойте и настройте в кластере [atlantis](https://www.runatlantis.io/) для отслеживания изменений инфраструктуры. Альтернативный вариант 3 задания: вместо Terraform Cloud или atlantis настройте на автоматический запуск и применение конфигурации terraform из вашего git-репозитория в выбранной вами CI-CD системе при любом комите в main ветку. Предоставьте скриншоты работы пайплайна из CI/CD системы.
 
 Ожидаемый результат:
-1. [Git репозиторий](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/tree/k8s) с конфигурационными файлами для настройки Kubernetes (в качестве конфигурационных файлов представлены деплой [nginx-deployment.yml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/k8s/nginx-deployment.yml) и сервис [nginx-service.yml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/k8s/nginx-service.yml) для развертывания нашей тестовой страницы).
-2. Http доступ к [web интерфейсу grafana](http://84.252.133.212:32000/?orgId=1).
-3. [Дашборды в grafana](http://84.252.133.212:32000/dashboards) отображающие состояние Kubernetes кластера.
-4. Http доступ к [тестовому приложению](http://84.252.133.212:32001/).
+1. [Git репозиторий](https://github.com/caevert/devops-diplom-ycloud/tree/main/IV.Monitoring) с конфигурационными файлами для настройки Kubernetes (в качестве конфигурационных файлов представлены деплой [nginx-deployment.yml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/k8s/nginx-deployment.yml) и сервис [nginx-service.yml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/k8s/nginx-service.yml) для развертывания нашей тестовой страницы).
+2. [Http доступ к web интерфейсу grafana](http://84.252.133.212:32000/?orgId=1).
+3. [Дашборды в grafana отображающие состояние Kubernetes кластера](http://84.252.133.212:32000/dashboards) .
+4. [Http доступ ктестовому приложению](http://84.252.133.212:32001/).
    
 ---
 ### Установка и настройка CI/CD

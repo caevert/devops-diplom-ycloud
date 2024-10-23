@@ -170,64 +170,91 @@ users:
 ---
 
 
-### Создание тестового приложения
+### Этап третий - подготовка тестового приложения
 
-Для перехода к следующему этапу необходимо подготовить тестовое приложение, эмулирующее основное приложение разрабатываемое вашей компанией.
+1. Создаем [`Dockerfile`](docker/Dockerfile) с простой конфигураций сервера `nginx` отдающим статическую страницу c именем хоста(контейнера) и версией сборки(тэгом).
 
-Способ подготовки:
+```text
+FROM nginx:alpine
 
-1. Рекомендуемый вариант:  
-   а. Создайте отдельный git репозиторий с простым nginx конфигом, который будет отдавать статические данные.
+COPY default.conf /etc/nginx/conf.d/
+COPY index.html /usr/share/nginx/html/
 
-В соответствии с рекомендуемым вариантом создан репозиторий [nginx-static](https://github.com/LeonidKhoroshev/nginx-static/tree/main)
-
-Далее копируем репозиторий на виртуальную машину в одноименную директорию
-```
-git init
-git clone https://github.com/LeonidKhoroshev/nginx-static.git
-```
-Создаем внутри проекта директорию `static` и в ней указываем конфигурацию файла основной стартовой страницы [index.html](https://github.com/LeonidKhoroshev/nginx-static/blob/main/static/index.html) и [styles.css](https://github.com/LeonidKhoroshev/nginx-static/blob/main/static/styles.css), созданного для улучшения внешнего вида нашей веб-страницы. Также создаем директорию [images](https://github.com/LeonidKhoroshev/nginx-static/tree/main/images) для хранения там фоновой картинки.
-  
-   б. Подготовьте Dockerfile для создания образа приложения.  
-
-Переходим в корневую директорию и создаем `Dockerfile` следующей конфигурации
-```
-FROM nginx:latest
-
-COPY ./static /usr/share/nginx/html
-
-EXPOSE 80
-```
-Сохраняем изменения в ветке `main` нашего репозитория:
-```
-git add .
-git commit -m "first commit"
-git push https://github.com/LeonidKhoroshev/nginx-static main
-```
-Далее авторизовываемся на [DockerHub](https://hub.docker.com) и в консоли и собираем `docker` образ
-```
-docker login
-docker build -t leonid1984/nginx-static:latest .
+CMD ["nginx", "-g", "daemon off;"]
 ```
 
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom12.png)
+2. Также добавляем в репозиторий файл конфигурации [`default.conf`](docker/default.conf) и файл [`index.html`](docker/index.html)
 
-И размещаем его в нашем хранилище на `DockerHub`
+3. Далее следует собрать образ и отправить его в registry DockerHub
+
+```shell
+$ cd docker
+$ docker build -t rowhe/nginx_static_index:0.0.2 .
+
+Sending build context to Docker daemon  4.096kB
+Step 1/4 : FROM nginx:alpine
+alpine: Pulling from library/nginx
+63b65145d645: Pull complete
+51f129e7c3f1: Pull complete
+f32490ce40c5: Pull complete
+d18f1b67600c: Pull complete
+b793aaf052d0: Pull complete
+10b0102e5979: Pull complete
+ec50f2776186: Pull complete
+Digest: sha256:ff07dba791a114f5d944c8455e8236ca4b184bfd8d21d90b7755a4ba0a119b06
+Status: Downloaded newer image for nginx:alpine
+ ---> fddf8c2fcb06
+Step 2/4 : COPY default.conf /etc/nginx/conf.d/
+ ---> 76d6eac0e768
+Step 3/4 : COPY index.html /usr/share/nginx/html/
+ ---> 9d9f6ac461fe
+Step 4/4 : CMD ["nginx", "-g", "daemon off;"]
+ ---> Running in 9bea7252bf6f
+Removing intermediate container 9bea7252bf6f
+ ---> 4f80752a2eb2
+Successfully built 4f80752a2eb2
+Successfully tagged rowhe/nginx_static_idex:0.0.2
 ```
-docker push leonid1984/nginx-static:latest
+
+
+```shell
+$ docker push rowhe/nginx_static_index
+
+The push refers to repository [docker.io/rowhe/nginx_static_index]
+f0756d312c74: Pushed
+175495e4dc90: Pushed
+a7fcaf3114d5: Mounted from library/nginx
+dff076fb6916: Mounted from library/nginx
+d280bc8e13e2: Mounted from library/nginx
+07a0bc54bc50: Mounted from library/nginx
+2b5f63e9fb78: Mounted from library/nginx
+3b6b66b66e55: Mounted from library/nginx
+7cd52847ad77: Mounted from library/nginx
+0.0.2: digest: sha256:91efabe17ece024823f470e9d4e25eb0d53d5c0f0a7fc326e086176d0f6a6671 size: 2195
 ```
 
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom13.png)
+3.1 Проверим, что образ загрузился на DockerHub
 
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom14.png)
+![DockerHub](img/img.png)
 
-2. Альтернативный вариант:  
-   а. Используйте любой другой код, главное, чтобы был самостоятельно создан Dockerfile.
+4. Запустим контейнер и проверим его работу
 
-Ожидаемый результат:
+```shell
+$ docker run -d --rm -p 80:80 --name nginx rowhe/nginx_static_index:0.0.2
+778777812dc6f19f22f1baa0cc192afb1dac22ba67cc093d18bffc580a7c55d1 
+```
 
-1. [Git репозиторий](https://github.com/LeonidKhoroshev/nginx-static) с тестовым приложением и [Dockerfile](https://github.com/LeonidKhoroshev/nginx-static/blob/main/Dockerfile).
-2. Регистри с собранным [docker image](https://hub.docker.com/repository/docker/leonid1984/nginx-static/general). В качестве регистри может быть DockerHub или Yandex Container Registry, созданный также с помощью terraform.
+5. Проверим работу сервера
+```shell
+$ curl localhost
+
+<html>
+<body>
+        <h1>Host: 778777812dc6</h1>
+        Version: 1.1
+</body>
+</html>
+```
 
 ---
 ### Подготовка cистемы мониторинга и деплой приложения

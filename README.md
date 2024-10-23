@@ -385,9 +385,9 @@ kubectl get pods -l app=nginx-static
 
 Ожидаемый результат:
 1. [Git репозиторий](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/tree/k8s) с конфигурационными файлами для настройки Kubernetes (в качестве конфигурационных файлов представлены деплой [nginx-deployment.yml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/k8s/nginx-deployment.yml) и сервис [nginx-service.yml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/k8s/nginx-service.yml) для развертывания нашей тестовой страницы).
-2. Http доступ к [web интерфейсу grafana](http://89.169.145.151:32000/?orgId=1).
-3. [Дашборды в grafana](http://89.169.145.151:32000/dashboards) отображающие состояние Kubernetes кластера.
-4. Http доступ к [тестовому приложению](http://89.169.145.151:32001/).
+2. Http доступ к [web интерфейсу grafana](http://84.252.133.212:32000/?orgId=1).
+3. [Дашборды в grafana](http://84.252.133.212:32000/dashboards) отображающие состояние Kubernetes кластера.
+4. Http доступ к [тестовому приложению](http://84.252.133.212:32001/).
    
 ---
 ### Установка и настройка CI/CD

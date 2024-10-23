@@ -59,13 +59,14 @@
 ![S3 backend for terraform tfstate in YC Object Storage](./assets/T-2.png)
 
 ![VMS in YC](./assets/VMs%20in%20YC.png)
+```
 +----------------------+--------+---------------+---------+----------------+----------------+
 |          ID          |  NAME  |    ZONE ID    | STATUS  |  EXTERNAL IP   |  INTERNAL IP   |
 +----------------------+--------+---------------+---------+----------------+----------------+
 | epdjehfpdpfalutkuep9 | slave2 | ru-central1-b | RUNNING | 158.160.69.16 | 192.168.200.20  |
 | fhm2630o4n2btldi565o | slave1 | ru-central1-a | RUNNING | 130.193.38.67 | 192.168.100.34 |
 | fv485411t4bqp5mff2dt | master | ru-central1-d | RUNNING | 84.252.133.212  | 192.168.10.100 
-
+```
 2. Полученная конфигурация инфраструктуры является предварительной, поэтому в ходе дальнейшего выполнения задания возможны изменения.
 
 ---

@@ -84,7 +84,7 @@ cp inventory/sample inventory/netology
 
 3. Выясняем айпи машин кластера на которые будет производится установка:
 
-![instances](img/img_1.png)
+![Terraform apply](./assets/K-1.png)
 
 4. Для установки необходимо указать конфигурацию кластера.
 

@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-static
+  name: nmynginx
   labels:
-    app: nginx-static
+    app: nmynginx
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nginx-static
+      app: nmynginx
   template:
     metadata:
       labels:
-        app: nginx-static
+        app: nmynginx
     spec:
       containers:
-        - name: nginx
-          image: leonid1984/nginx-static:latest
+        - name: nmynginx
+          image: caevert24/nmynginx
           ports:
             - containerPort: 80

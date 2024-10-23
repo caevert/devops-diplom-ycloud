@@ -58,7 +58,7 @@
 
 ![S3 backend for terraform tfstate in YC Object Storage](./assets/T-2.png)
 
-![VMS in YC](./assets/VMs%20in%20YC.png)
+VMS in YC
 ```
 +----------------------+--------+---------------+---------+----------------+----------------+
 |          ID          |  NAME  |    ZONE ID    | STATUS  |  EXTERNAL IP   |  INTERNAL IP   |

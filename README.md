@@ -295,7 +295,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
 kubectl get pods -n monitoring
 ```
 
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom8.png)
+![Mon](./assets/Mon-1.png)
 
 Получаем пароль от `Grafana`
 ```
@@ -313,15 +313,14 @@ grafana:
 helm upgrade prometheus prometheus-community/kube-prometheus-stack -n monitoring -f values.yml
 ```
 
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom9.png)
+![Mon](./assets/Mon-2.png)
 
-Далее настраиваем необходимые метрики, так для k8s кластера. Для простоты воспользуемся готовым дашбордом из того, что предлагает `Grafana` - [ID 315](https://grafana.com/grafana/dashboards/315-kubernetes-cluster-monitoring-via-prometheus/)
+![Mon](./assets/Mon-3.png)
 
-Проверем наличие новых дашбордов
-
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom10.png)
-
-Видим, что из кластера поступают данные, но в пока мы не деплоили наше приложение, мониторинг не слишком информативен ввиду отсутствия рабочей нагрузки
+![Mon](./assets/Mon-4.png)
+![Mon](./assets/Mon-4-1.png)
+![Mon](./assets/Mon-4-2.png)
+![Mon](./assets/Mon-4-3.png)
 
 ![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom11.png)
 

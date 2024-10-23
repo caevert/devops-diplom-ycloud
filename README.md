@@ -90,44 +90,43 @@ cp inventory/sample inventory/netology
 
 ```shell
 nano inventory/netology/hosts.yaml
-
 all:
   hosts:
-    node1:
-      ansible_host: 158.160.44.213
-      ip: 10.1.0.29
+    master:
+      ansible_host: 84.252.135.85
+      ip: 192.168.10.100 
       ansible_user: ubuntu
       kubeconfig_localhost: true
-    node2:
-      ansible_host: 84.201.175.72
-      ip: 10.1.0.3
+    worker1:
+      ansible_host: 89.169.143.31
+      ip: 192.168.100.20
       ansible_user: ubuntu
-    node3:
-      ansible_host: 158.160.53.255
-      ip: 10.1.0.25
-      ansible_user: ubuntu
-    node3:
-      ansible_host: 158.160.49.140
-      ip: 10.1.0.12
+    worker2:
+      ansible_host: 158.160.12.225
+      ip: 192.168.200.14
       ansible_user: ubuntu
   children:
     kube_control_plane:
       hosts:
-        node1:
+        master:
     kube_node:
       hosts:
-        node2:
-        node3:
-        node3:
+        master:
+        worker1:
+        worker2:
     etcd:
       hosts:
-        node1:
+        master:
+        worker1:
+        worker2:
     k8s_cluster:
       children:
         kube_control_plane:
         kube_node:
     calico_rr:
       hosts: {}
+
+
 ```
 
 5. Также необходимо предусмотреть генерацию сертификата для работы `kubectl`, укажем адрес управляющей ноды:

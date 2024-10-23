@@ -37,39 +37,7 @@
 Предварительная подготовка к установке и запуску Kubernetes кластера.
 
 1. Создайте сервисный аккаунт, который будет в дальнейшем использоваться Terraform для работы с инфраструктурой с необходимыми и достаточными правами. Не стоит использовать права суперпользователя
-```tf
-resource "yandex_iam_service_account" "sa" {
-  name = var.sa_name
-}
-```
-Добавляем права `storage.admin`, необходимые для создания и работы с бакетом
-```tf
-resource "yandex_resourcemanager_folder_iam_member" "sa-admin" {
-  folder_id = var.folder_id
-  role      = "storage.admin"
-  member    = "serviceAccount:${yandex_iam_service_account.sa.id}"
-}
-```
-Создаем ключ доступа к нашему хранилищу
-```tf
-resource "yandex_iam_service_account_static_access_key" "sa-static-key" {
-  service_account_id = yandex_iam_service_account.sa.id
-  description        = "static access key for object storage"
-}
-```
-Также, чтобы получить ключ доступа и привытный ключ, суонфигурированный вышеуказанным кодом - подготовит возможность вывода значений ключей в терминал, для чего создадим файл `outputs.tf`
-```tf
-output "s3_access_key" {
-  description = "Yandex Cloud S3 access key"
-  value       = yandex_iam_service_account_static_access_key.sa-static-key.access_key
-  sensitive   = true
-}
-
-output "s3_secret_key" {
-  description = "Yandex Cloud S3 secret key"
-  value       = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
-  sensitive   = true
-```
+![Alt_text](https://github.com/caevert/devops-diplom-yandexcloud/tree/main/I.Terraform/bucket.tf)
 
 2. Подготовьте [backend](https://www.terraform.io/docs/language/settings/backends/index.html) для Terraform:  
    а. Рекомендуемый вариант: S3 bucket в созданном ЯО аккаунте(создание бакета через TF)

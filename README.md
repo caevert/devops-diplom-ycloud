@@ -54,7 +54,7 @@
 
 ![Terraform apply](./assets/T-1.png)
 
-![Service accounts](./assets/Service%20accounts%20YC.png)
+![Service accounts](./assets/T-3.png)
 
 ![S3 backend for terraform tfstate in YC Object Storage](./assets/T-2.png)
 

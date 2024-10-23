@@ -134,7 +134,7 @@ all:
 ```shell
 nano inventory/netology/group_vars/k8s_cluster/k8s-cluster.yml
 
-supplementary_addresses_in_ssl_keys: [158.160.44.213]
+supplementary_addresses_in_ssl_keys: [84.252.135.85]
 ```
 
 6. После развертывания кластера скопируем локально в `.kube/config` файл конфигурации кластера Кубернетес `.kube/config` с управляющей ноды

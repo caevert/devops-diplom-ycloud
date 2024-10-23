@@ -322,7 +322,6 @@ helm upgrade prometheus prometheus-community/kube-prometheus-stack -n monitoring
 ![Mon](./assets/Mon-4-2.png)
 ![Mon](./assets/Mon-4-3.png)
 
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom11.png)
 
 
 2. Задеплоить тестовое приложение, например, [nginx](https://www.nginx.com/) сервер отдающий статическую страницу.
@@ -332,22 +331,22 @@ Cоздаем деплой `nginx-deployment.yml`, куда прописывае
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-static
+  name: nmynginx
   labels:
-    app: nginx-static
+    app: nmynginx
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nginx-static
+      app: nmynginx
   template:
     metadata:
       labels:
-        app: nginx-static
+        app: nmynginx
     spec:
       containers:
         - name: nginx
-          image: leonid1984/nginx-static:latest
+          image: caevert24/nmynginx
           ports:
             - containerPort: 80
 ```
@@ -356,9 +355,9 @@ spec:
 piVersion: v1
 kind: Service
 metadata:
-  name: nginx-static
+  name: nmynginx
   labels:
-    app: nginx-static
+    app: nmynginx
 spec:
   type: NodePort
   ports:
@@ -366,7 +365,7 @@ spec:
       targetPort: 80
       nodePort: 32001
   selector:
-    app: nginx-static
+    app: nmynginx
 ```
 
 Применяем изменения и проверяем результат
@@ -376,9 +375,7 @@ kubectl apply -f nginx-service.yml
 kubectl get pods -l app=nginx-static
 ```
 
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom15.png)
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom16.png)
-
+![Mon](./assets/Mon-6.png)
 
 
 Способ выполнения:

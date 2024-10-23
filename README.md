@@ -162,7 +162,7 @@ users:
 ```
 7. Проверим подключение к кластеру `Kubernetes`
 
-![kubectl](img/img_2.png)
+![Kube](./assets/K-4.png)
 
 
 

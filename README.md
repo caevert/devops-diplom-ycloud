@@ -36,8 +36,40 @@
 
 Предварительная подготовка к установке и запуску Kubernetes кластера.
 
+Предварительная подготовка к установке и запуску Kubernetes кластера.
+
 1. Создайте сервисный аккаунт, который будет в дальнейшем использоваться Terraform для работы с инфраструктурой с необходимыми и достаточными правами. Не стоит использовать права суперпользователя
-![Alt_text](https://github.com/caevert/devops-diplom-yandexcloud/tree/main/I.Terraform/bucket.tf)
+2. Подготовьте [backend](https://www.terraform.io/docs/language/settings/backends/index.html) для Terraform:  
+   а. Рекомендуемый вариант: S3 bucket в созданном ЯО аккаунте(создание бакета через TF)
+   б. Альтернативный вариант:  [Terraform Cloud](https://app.terraform.io/)
+3. Создайте конфигурацию Terrafrom, используя созданный бакет ранее как бекенд для хранения стейт файла. Конфигурации Terraform для создания сервисного аккаунта и бакета и основной инфраструктуры следует сохранить в разных папках.
+4. Создайте VPC с подсетями в разных зонах доступности.
+5. Убедитесь, что теперь вы можете выполнить команды `terraform destroy` и `terraform apply` без дополнительных ручных действий.
+6. В случае использования [Terraform Cloud](https://app.terraform.io/) в качестве [backend](https://www.terraform.io/docs/language/settings/backends/index.html) убедитесь, что применение изменений успешно проходит, используя web-интерфейс Terraform cloud.
+   Ожидаемые результаты:
+
+1. Terraform сконфигурирован и создание инфраструктуры посредством Terraform возможно без дополнительных ручных действий.
+
+[Конфигурация terraform](I.Terraform/)
+
+![Terraform apply](./assets/T-1.png)
+
+![Service accounts](./assets/Service%20accounts%20YC.png)
+
+![S3 backend for terraform tfstate in YC Object Storage](./assets/T-2.png)
+
+![VMS in YC](./assets/VMs%20in%20YC.png)
++----------------------+--------+---------------+---------+----------------+----------------+
+|          ID          |  NAME  |    ZONE ID    | STATUS  |  EXTERNAL IP   |  INTERNAL IP   |
++----------------------+--------+---------------+---------+----------------+----------------+
+| epdjehfpdpfalutkuep9 | slave2 | ru-central1-b | RUNNING | 158.160.69.16 | 192.168.200.20  |
+| fhm2630o4n2btldi565o | slave1 | ru-central1-a | RUNNING | 130.193.38.67 | 192.168.100.34 |
+| fv485411t4bqp5mff2dt | master | ru-central1-d | RUNNING | 84.252.133.212  | 192.168.10.100 
+
+2. Полученная конфигурация инфраструктуры является предварительной, поэтому в ходе дальнейшего выполнения задания возможны изменения.
+
+---
+### Создание Kubernetes кластера
 
 2. Подготовьте [backend](https://www.terraform.io/docs/language/settings/backends/index.html) для Terraform:  
    а. Рекомендуемый вариант: S3 bucket в созданном ЯО аккаунте(создание бакета через TF)

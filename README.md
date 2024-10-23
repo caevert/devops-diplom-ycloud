@@ -188,7 +188,7 @@ EXPOSE 80/tcp
 CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
 ```
 
-2. Также добавляем в репозиторий файл конфигурации ![Dock](./III.Application/default.conf) и файл ![Dock](./III.Application/index.html)
+2. Также добавляем в репозиторий файл конфигурации [`default.conf`](III.Application/default.conf) и файл ![Dock](./III.Application/index.html)
 
 3. Далее следует собрать образ и отправить его в registry DockerHub
 

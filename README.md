@@ -222,41 +222,45 @@ Successfully tagged caevert24/nmynginx
 ```
 
 ![Nginx](./assets/d-3.png)
-```shell
-$ docker push caevert24/nmynginx
-
-The push refers to repository [docker.io/caevert24/nmynginx]
-f0756d312c74: Pushed
-175495e4dc90: Pushed
-a7fcaf3114d5: Mounted from library/nginx
-dff076fb6916: Mounted from library/nginx
-d280bc8e13e2: Mounted from library/nginx
-07a0bc54bc50: Mounted from library/nginx
-2b5f63e9fb78: Mounted from library/nginx
-3b6b66b66e55: Mounted from library/nginx
-7cd52847ad77: Mounted from library/nginx
-0.0.2: digest: sha256:91efabe17ece024823f470e9d4e25eb0d53d5c0f0a7fc326e086176d0f6a6671 size: 2195
-```
 
 3.1 Проверим, что образ загрузился на DockerHub
 
-![DockerHub](img/img.png)
+![Nginx](./assets/d-4.png)
 
 4. Запустим контейнер и проверим его работу
 
 ```shell
-$ docker run -d --rm -p 80:80 --name nginx rowhe/nginx_static_index:0.0.2
-778777812dc6f19f22f1baa0cc192afb1dac22ba67cc093d18bffc580a7c55d1 
+$ docker run -d --rm -p 80:80 --name nginx caevert24/nmynginx
+ff07dba791a114f5d944c8455e8236ca4b184bfd8d21d90b7755a4ba0a119b06
 ```
 
 5. Проверим работу сервера
 ```shell
 $ curl localhost
 
+<!DOCTYPE html>
 <html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
 <body>
-        <h1>Host: 778777812dc6</h1>
-        Version: 1.1
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
 </body>
 </html>
 ```

@@ -174,16 +174,21 @@ users:
 
 1. Создаем [`Dockerfile`](docker/Dockerfile) с простой конфигураций сервера `nginx` отдающим статическую страницу c именем хоста(контейнера) и версией сборки(тэгом).
 
-```text
-FROM nginx:alpine
+```
+# Pull the minimal Ubuntu image
+FROM nginx
 
+# Copy the Nginx config
 COPY default.conf /etc/nginx/conf.d/
-COPY index.html /usr/share/nginx/html/
 
-CMD ["nginx", "-g", "daemon off;"]
+# Expose the port for access
+EXPOSE 80/tcp
+
+# Run the Nginx server
+CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
 ```
 
-2. Также добавляем в репозиторий файл конфигурации [`default.conf`](docker/default.conf) и файл [`index.html`](docker/index.html)
+2. Также добавляем в репозиторий файл конфигурации ![Dock](./III.Application/default.conf) и файл ![Dock](./III.Application/index.html)
 
 3. Далее следует собрать образ и отправить его в registry DockerHub
 

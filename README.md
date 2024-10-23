@@ -194,10 +194,10 @@ CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
 
 ```shell
 $ cd docker
-$ docker build -t rowhe/nginx_static_index:0.0.2 .
+$ docker build -t caevert24/nmynginx .
 
 Sending build context to Docker daemon  4.096kB
-Step 1/4 : FROM nginx:alpine
+Step 1/4 : FROM nginx
 alpine: Pulling from library/nginx
 63b65145d645: Pull complete
 51f129e7c3f1: Pull complete
@@ -207,7 +207,7 @@ b793aaf052d0: Pull complete
 10b0102e5979: Pull complete
 ec50f2776186: Pull complete
 Digest: sha256:ff07dba791a114f5d944c8455e8236ca4b184bfd8d21d90b7755a4ba0a119b06
-Status: Downloaded newer image for nginx:alpine
+Status: Downloaded newer image for nginx
  ---> fddf8c2fcb06
 Step 2/4 : COPY default.conf /etc/nginx/conf.d/
  ---> 76d6eac0e768
@@ -218,14 +218,14 @@ Step 4/4 : CMD ["nginx", "-g", "daemon off;"]
 Removing intermediate container 9bea7252bf6f
  ---> 4f80752a2eb2
 Successfully built 4f80752a2eb2
-Successfully tagged rowhe/nginx_static_idex:0.0.2
+Successfully tagged caevert24/nmynginx
 ```
 
-
+![Nginx](./assets/d-3.png)
 ```shell
-$ docker push rowhe/nginx_static_index
+$ docker push caevert24/nmynginx
 
-The push refers to repository [docker.io/rowhe/nginx_static_index]
+The push refers to repository [docker.io/caevert24/nmynginx]
 f0756d312c74: Pushed
 175495e4dc90: Pushed
 a7fcaf3114d5: Mounted from library/nginx

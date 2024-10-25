@@ -387,7 +387,7 @@ kubectl get pods -l app=nginx-static
 1. [Git репозиторий](https://github.com/caevert/devops-diplom-ycloud/tree/main/IV.Monitoring) с конфигурационными файлами для настройки Kubernetes (в качестве конфигурационных файлов представлены деплой [nginx-deployment.yml](https://github.com/caevert/devops-diplom-ycloud/tree/main/IV.Monitoring/nginx-deployment.yml) и сервис [nginx-service.yml](https://github.com/caevert/devops-diplom-ycloud/tree/main/IV.Monitoring/nginx-service.yml) для развертывания нашей тестовой страницы).
 2. [Http доступ к web интерфейсу grafana](http://84.252.133.212:32000/login).
 3. [Дашборды в grafana отображающие состояние Kubernetes кластера](http://84.252.133.212:32000/dashboards) .
-4. [Http доступ ктестовому приложению](http://84.252.133.212:32001/).
+4. [Http доступ к тестовому приложению](http://84.252.133.212:32001/).
    
 ---
 
@@ -705,4 +705,7 @@ Deploy:
 5. Репозиторий с конфигурацией Kubernetes кластера.
    [Конфигурация](https://github.com/caevert/devops-diplom-ycloud/tree/main/II.K8s/kubeconfig)
 6. Ссылка на тестовое приложение и веб интерфейс Grafana с данными доступа.
+[Тестовое приложение](http://84.252.133.212:32001/)
+
+[Интерфейс Grafana](http://84.252.133.212:32000/login) логин/пароль по-умолчанию
 7. Все репозитории рекомендуется хранить на одном ресурсе (github, gitlab)

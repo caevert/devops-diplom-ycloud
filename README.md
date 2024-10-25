@@ -87,6 +87,8 @@ cp inventory/sample inventory/netology
 ![Kube](./assets/K-1.png)
 
 4. Для установки необходимо указать конфигурацию кластера.
+   
+ <details>
 
 ```shell
 nano inventory/netology/hosts.yaml
@@ -126,8 +128,8 @@ all:
     calico_rr:
       hosts: {}
 
-
 ```
+</details>
 
 5. Также необходимо предусмотреть генерацию сертификата для работы `kubectl`, укажем адрес управляющей ноды:
 
@@ -385,8 +387,8 @@ kubectl get pods -l app=nginx-static
 
 Ожидаемый результат:
 1. [Git репозиторий](https://github.com/caevert/devops-diplom-ycloud/tree/main/IV.Monitoring) с конфигурационными файлами для настройки Kubernetes (в качестве конфигурационных файлов представлены деплой [nginx-deployment.yml](https://github.com/caevert/devops-diplom-ycloud/tree/main/IV.Monitoring/nginx-deployment.yml) и сервис [nginx-service.yml](https://github.com/caevert/devops-diplom-ycloud/tree/main/IV.Monitoring/nginx-service.yml) для развертывания нашей тестовой страницы).
-2. [Http доступ к web интерфейсу grafana](http://84.252.133.212:32000/login).
-3. [Дашборды в grafana отображающие состояние Kubernetes кластера](http://84.252.133.212:32000/dashboards) .
+2. [Http доступ к web интерфейсу grafana](http://84.252.133.212:32000/login). логин/пароль по-умолчанию
+3. [Дашборды в grafana отображающие состояние Kubernetes кластера](http://84.252.133.212:32000/dashboards) . логин/пароль по-умолчанию
 4. [Http доступ к тестовому приложению](http://84.252.133.212:32001/).
    
 ---

@@ -703,5 +703,6 @@ Deploy:
 4. Репозиторий с Dockerfile тестового приложения и ссылка на собранный docker image.
    [Репозиторий c Dockerfile](https://github.com/caevert/mynginx/blob/main/Dockerfile)
 5. Репозиторий с конфигурацией Kubernetes кластера.
-8. Ссылка на тестовое приложение и веб интерфейс Grafana с данными доступа.
-9. Все репозитории рекомендуется хранить на одном ресурсе (github, gitlab)
+   [Конфигурация](https://github.com/caevert/devops-diplom-ycloud/tree/main/II.K8s/kubeconfig)
+6. Ссылка на тестовое приложение и веб интерфейс Grafana с данными доступа.
+7. Все репозитории рекомендуется хранить на одном ресурсе (github, gitlab)

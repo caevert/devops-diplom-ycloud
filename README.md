@@ -608,7 +608,91 @@ Deploy:
 ## Что необходимо для сдачи задания?
 
 1. Репозиторий с конфигурационными файлами Terraform и готовность продемонстрировать создание всех ресурсов с нуля.
+   [Конфигурация terraform](I.Terraform/)
 2. Пример pull request с комментариями созданными atlantis'ом или снимки экрана из Terraform Cloud или вашего CI-CD-terraform pipeline.
+   <details>
+
+```
+stages:
+  - build
+  - push
+  - deploy
+variables:
+  IMAGE_NAME: "crud"
+  DOCKER_IMAGE_TAG: $DOCKER_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  DOCKER_REGISTRY_IMAGE: $DOCKER_REGISTRY_USER/$IMAGE_NAME
+image: docker:latest
+services:
+- docker:dind
+before_script:
+  - docker login -u $DOCKER_REGISTRY_USER -p $DOCKER_ACCESS_TOKEN
+
+Build:
+  stage: build
+  script:
+    - docker pull $DOCKER_REGISTRY_IMAGE:latest || true
+    - >
+      docker build
+      --pull
+      --cache-from $DOCKER_REGISTRY_IMAGE:latest
+      --label "org.opencontainers.image.title=$CI_PROJECT_TITLE"
+      --label "org.opencontainers.image.url=$CI_PROJECT_URL"
+      --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
+      --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
+      --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
+      --tag $DOCKER_IMAGE_TAG
+      .
+
+    - docker push $DOCKER_IMAGE_TAG
+
+Push latest:
+  variables:
+    # We are just playing with Docker here.
+    # We do not need GitLab to clone the source code.
+    GIT_STRATEGY: none
+  stage: push
+  only:
+    # Only "main" should be tagged "latest"
+    - main
+  script:
+    # Because we have no guarantee that this job will be picked up by the same runner
+    # that built the image in the previous step, we pull it again locally
+    - docker pull $DOCKER_IMAGE_TAG
+    # Then we tag it "latest"
+    - docker tag $DOCKER_IMAGE_TAG $DOCKER_REGISTRY_IMAGE:latest
+    # Annnd we push it.
+    - docker push $DOCKER_REGISTRY_IMAGE:latest
+
+Push tag:
+  variables:
+    # Again, we do not need the source code here. Just playing with Docker.
+    GIT_STRATEGY: none
+  stage: push
+  only:
+    # We want this job to be run on tags only.
+    - main
+  script:
+    if [ $CI_COMMIT_TAG == "true" ]; then
+    - docker pull $DOCKER_IMAGE_TAG
+    - docker tag $DOCKER_IMAGE_TAG $DOCKER_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    - docker push $DOCKER_REGISTRY_IMAGE:$CI_COMMIT_TAG ; fi
+
+Deploy:
+  stage: deploy
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""] 
+  only:
+    - main
+  when: manual
+  script:
+    - kubectl apply -f k8s/deployment.yaml -n application
+```
+
+</details>
+На первой стадии (build) происходит авторизация в Docker Hub, сборка образа и его публикация в реестре Docker Hub. Сборка образа будет происходить только для main ветки. Docker образ собирается с тегом latest'.
+
+На второй стадии (deploy) будет применяется конфигурационный файл для доступа к кластеру Kubernetes и манифест из git репозитория. Затем перезапускается Deployment для применения обновленного приложения. Эта стадия выполняется только для ветки main и только при условии, что первая стадия build была выполнена успешно.
 3. Репозиторий с конфигурацией ansible, если был выбран способ создания Kubernetes кластера при помощи ansible.
 4. Репозиторий с Dockerfile тестового приложения и ссылка на собранный docker image.
 5. Репозиторий с конфигурацией Kubernetes кластера.

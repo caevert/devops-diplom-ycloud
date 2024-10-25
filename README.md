@@ -719,3 +719,4 @@ Deploy:
 [Интерфейс Grafana](http://84.252.133.212:32000/login) логин/пароль по-умолчанию
 
 7. Все репозитории рекомендуется хранить на одном ресурсе (github, gitlab)
+   [Диплом на GitHub](https://github.com/caevert/devops-diplom-ycloud)

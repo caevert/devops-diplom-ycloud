@@ -141,8 +141,9 @@ supplementary_addresses_in_ssl_keys: [84.252.135.85]
 
 6. После развертывания кластера скопируем локально в `.kube/config` файл конфигурации кластера Кубернетес `.kube/config` с управляющей ноды
 
-   <details>
    
+ <details>
+  
 ```
 piVersion: v1
 clusters:

@@ -390,6 +390,7 @@ kubectl get pods -l app=nginx-static
 4. [Http доступ ктестовому приложению](http://84.252.133.212:32001/).
    
 ---
+
 ### Установка и настройка CI/CD
 
 Осталось настроить ci/cd систему для автоматической сборки docker image и деплоя приложения при изменении кода.
@@ -401,264 +402,224 @@ kubectl get pods -l app=nginx-static
 
 Можно использовать [teamcity](https://www.jetbrains.com/ru-ru/teamcity/), [jenkins](https://www.jenkins.io/), [GitLab CI](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/) или GitHub Actions.
 
-Для настройки CI/CD процессов нашего проекта выбран `Jenkins` как наиболее широко применяемое open-source решение. Ранее в соответствующем модуле обучения установка `Jenkins` была описана посредством  создания двух виртуальных машин `jenkins-master` и `jenkins-agent` на базе следующего [кода terraform](https://github.com/LeonidKhoroshev/terraform-team). В целях экономии вычислительных ресурсов, а также общей архитектуры и логики работы нашей инфраструктуры в данном задании выбран вариант запуска `Jenkins` в k8s по следующей [инструкции](https://www.jenkins.io/doc/book/installing/kubernetes/).
-
-Копируем репозиторий
-```
-git clone https://github.com/scriptcamp/kubernetes-jenkins
-```
-Создаем новое пространство имен, чтобы было проще отслеживать работу подов и сервисов
-```
-kubectl create namespace devops-tools
-```
-Создаем сервисный аккаунт для `Jenkins`, оставляя без изменений файл `serviceAccount.yaml` из скачанного репозитория
-```
-kubectl apply -f serviceAccount.yaml
-```
-Указываем в `deployment.yaml` тома постоянного хранения данных (настройки пользователя, пайплайны и т.д., так как наш кластер использует ради экономии прерываемые виртуальные машины).
-```yml
-volumeMounts:
-            - name: jenkins-data
-              mountPath: /var/jenkins_home
-            - name: docker-socket
-              mountPath: /var/run/docker.sock
-            - name: docker-bin
-              mountPath: /tmp/docker-bin
-
-volumes:
-        - name: jenkins-data
-          persistentVolumeClaim:
-            claimName: jenkins-pvc
-        - name: docker-socket
-          hostPath:
-            path: /var/run/docker.sock
-        - name: docker-bin
-          emptyDir: {}
-```
-И соответственно создаем требуемый `persistent volume`
-```yml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: jenkins-pv
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: "/var/jenkins_home"
-```
-А также `persistent volume claim`
-```yml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: jenkins-pvc
-  namespace: devops-tools
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-```
-Для корректной работы необходимо создать директорию `/var/jenkins_home` на всех нодах нашего кластера, для чего необходимо в `deployment.yaml` добавить инитконтейнер, устанавливающий `docker` и `git`
-```yml
-initContainers:
-        - name: install-docker-git
-          image: ubuntu:22.04
-          command:
-          - sh
-          - -c
-          - |
-            apt-get update && \
-            apt-get install -y curl gnupg && \
-            curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
-            echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian bullseye stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-            apt-get update && \
-            apt-get install -y docker-ce-cli && \
-            mkdir -p /tmp/docker-bin && \
-            cp /usr/bin/docker /tmp/docker-bin/docker
-            apt-get install -y git
-          volumeMounts:
-          - name: docker-bin
-            mountPath: /tmp/docker-bin
-          - name: jenkins-data
-            mountPath: /var/jenkins_home
-          - name: docker-socket
-            mountPath: /var/run/docker.sock
-```
-
-Применяем изменения и проверяем успешный запуск `Jenkins`
-```
-kubectl apply -f pv.yaml
-kubectl apply -f pvc.yaml
-kubectl apply -f deployment.yaml
-kubectl get deployments -n devops-tools
-kubectl get pods -n devops-tools
-```
-
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom17.png)
-
-Далее создаем соответствующий сервис. Незначительно корректируем дефортный файл `service.yaml` из скачанного [репозитория](https://github.com/scriptcamp/kubernetes-jenkins), указав `nodePort: 32002`, так как дефолтный порт `32000` уже занят мониторингом (Grafana), а на порту `32001` работает наш сервер `nginx`.
-
-Запускаем сервис
-```
-kubectl apply -f service.yaml
-```
-Для первого входа через веб-интерфейс определяем пароль
-```
-kubectl logs jenkins-cf789dc4d-l2v56 --namespace=devops-tools
-```
-
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom18.png)
-
-Входим в графический интерфейс и устанавливаем плагины, предлагаемые `Jenkins`.
-Далее осуществляем стандартную настройку `Jenkins`, указывая логин, пароль и электронную почту в соответствующих пунктах меню. Далее копирую ссылку url для быстрого доступа (для упрощения задания ip адреса виртуальных машин, участвующих в проекте сделаны статическими). 
-```
-http://89.169.145.151:32002/
-```
-Далее необходимо настроить pipeline. Сборка и отправка  в регистр `docker-image` по условиям задания должна осуществляться при любом коммите в [репозитории](https://github.com/LeonidKhoroshev/nginx-static/tree/main).
-
-Для этого переходим в репозиторий и создаем `webhook` в веб-интерфейсе `GitHub`
-
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom19.png)
-
-Также необходимо настроить `Docker Credentials`  в веб-интерфейсе `Jenkins`.
-
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom20.png)
-
-Далее настраиваем агенты для сборки на основе `Kubernetes pod`. Для этого сначала установим плагин `Kubernetes` для `Jenkins`, далее создаем новое облако `Kubernetes`, в настройках прописываем пространство имен `devops-tools`, в котором развернут под с `Jenkins` и также через графический интерфейс тестируем соединение с кластером.
-
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom21.png)
-
-Убедившись в наличии подключения, добавляем шаблон пода, который будет являться нашим сборочным агентом. Задаем название `jenkins-agent`, указываем пространство имен и `image` [inbound-agent](https://hub.docker.com/r/jenkins/inbound-agent)
-
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom22.png)
-
-Подробная инструкция по созданию и настройке агента доступна по [ссылке](https://scmax.ru/articles/707733/). Поскольку после публикации статьи в Jenkins прошел ряд обновлений, то не вся информация в ней актуальна (например названия плагинов), но в целом описанный метод является рабочим (на период сентября 2024 года).
-
-Также для автоматизации нашего проекта необходима организация доступа через токен к `DockerHub`, Получаем токен в личном кабинете на `https://app.docker.com`
-
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom23.png)
-
-Сохраняем токен в `credentials`
-
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom24.png)
-
-После того как предварительная настройка `Jenkins` произведена, создадим `pipeline` для нашего проекта
-```
-pipeline {
-    agent any  
-
-    environment {
-        DOCKER_HUB_REPO = 'leonid1984/nginx-static'
-        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'  // ID учетных данных Docker Hub в Jenkins
-        KUBECONFIG_CREDENTIALS_ID = 'kubeconfig-credentials'  // ID учетных данных для подключения к Kubernetes в Jenkins
-    }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                // Получение кода из GitHub
-                git branch: 'main', url: 'https://github.com/LeonidKhoroshev/nginx-static.git'
-            }
-        }
-        
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // Получение текущего тега, если есть
-                    def tag = env.GIT_TAG_NAME ?: 'latest'
-                    // Сборка Docker-образа
-                    sh "docker build -t ${DOCKER_HUB_REPO}:${tag} ."
-                }
-            }
-        }
-        
-        stage('Push to Docker Hub') {
-           steps {
-             withCredentials([string(credentialsId: 'docker_hub_pat', variable: 'DOCKER_HUB_PAT')]) {
-               sh """
-               echo $DOCKER_HUB_PAT | docker login -u leonid1984 --password-stdin
-               docker push leonid1984/nginx-static:latest
-               """
-            }
-        }
-    }
-        
-        stage('Deploy to Kubernetes') {
-            when {
-                tag "v*" // Деплой выполняется только при создании тега
-            }
-            steps {
-                script {
-                    withCredentials([file(credentialsId: KUBECONFIG_CREDENTIALS_ID, variable: 'KUBECONFIG')]) {
-                        def tag = env.GIT_TAG_NAME ?: 'latest'
-                        // Применение конфигурации деплоя в Kubernetes
-                        sh """
-                        kubectl set image deployment/nginx-static-deployment nginx-static=${DOCKER_HUB_REPO}:${tag}
-                        kubectl rollout status deployment/nginx-static-deployment
-                        """
-                    }
-                }
-            }
-        }
-    }
-    
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
-        }
-    }
-}
-```
-
-Проверяем работу `pipeline`
-
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom25.png)
-
-Сборка прошла успешно
-
 Ожидаемый результат:
 
-1. [Интерфейс ci/cd](http://89.169.145.151:32002/) сервиса доступен по http.
-2. При любом коммите в [репозитории с тестовым приложением](https://github.com/LeonidKhoroshev/nginx-static) происходит сборка и отправка в регистр [Docker образа](https://hub.docker.com/r/leonid1984/nginx-static).
+1. Интерфейс ci/cd сервиса доступен по http.
+2. При любом коммите в репозиторие с тестовым приложением происходит сборка и отправка в регистр Docker образа.
 3. При создании тега (например, v1.0.0) происходит сборка и отправка с соответствующим label в регистри, а также деплой соответствующего Docker образа в кластер Kubernetes.
+
+
+## Выполнение задания:
+
+Выполняем настройку ci/cd системы для автоматической сборки docker image и деплоя приложения при изменении кода.
+
+1. Для организации процессов CI/CD воспользуемся функционалом GitLab, создаем репозиторий и отправляем наше приложение в этот репозиторий:
+
+<p align="center">
+  <img width="1200" height="600" src="./image/gitlab.png">
+</p>
+
+2. Заливаем приложение в созданный репозиторий GitLab:
+
+```
+aleksander@aleksander-System-Product-Name:~/devops-application$ git remote add diplom https://gitlab.com/anfilippov7/devops-application.git
+aleksander@aleksander-System-Product-Name:~/devops-application$ git branch -M main
+aleksander@aleksander-System-Product-Name:~/devops-application$ git remote -v
+diplom  https://gitlab.com/anfilippov7/devops-application.git (fetch)
+diplom  https://gitlab.com/anfilippov7/devops-application.git (push)
+origin  https://github.com/anfilippov7/devops-application.git (fetch)
+origin  https://github.com/anfilippov7/devops-application.git (push)
+aleksander@aleksander-System-Product-Name:~/devops-application$ git push -f diplom 
+Username for 'https://gitlab.com': anfilippov7
+Password for 'https://anfilippov7@gitlab.com': 
+Перечисление объектов: 156, готово.
+Подсчет объектов: 100% (156/156), готово.
+При сжатии изменений используется до 4 потоков
+Сжатие объектов: 100% (134/134), готово.
+Запись объектов: 100% (156/156), 1.26 МиБ | 2.63 МиБ/с, готово.
+Всего 156 (изменений 35), повторно использовано 3 (изменений 0), повторно использовано пакетов 0
+remote: Resolving deltas: 100% (35/35), done.
+To https://gitlab.com/anfilippov7/devops-application.git
+ + fae3cab...4972e8c main -> main (forced update)
+```
+
+3. Проверяем результат на GitLab:
+
+<p align="center">
+  <img width="1200" height="600" src="./image/gitlab2.png">
+</p>
+
+4. Для автоматизации процесса CI/CD создаем GitLab Runner, который будет выполнять задачи, указанные в файле .gitlab-ci.yml
+
+5. На странице настроек проекта в разделе подключения GitLab Runner создаем Runner. Указанные на странице данные понадобятся для регистрации и аутентификации Runner'а в проекте.
+
+<p align="center">
+  <img width="1200" height="600" src="./image/gitlab3.png">
+</p>
+
+6. Выполняем подготовку Kubernetes кластера к установке GitLab Runner'а. Создаем отдельный Namespace, в котором будет располагаться GitLab Runner и создаем Kubernetes secret, который будет использоваться для регистрации установленного в дальнейшем GitLab Runner:
+
+```
+ubuntu@control:~$ kubectl create namespace gitlab-runner
+namespace/gitlab-runner created
+ubuntu@control:~$ kubectl --namespace=gitlab-runner create secret generic runner-secret --from-literal=runner-registration-token="glrt-8G79CdQFjRbJKAHvoZs_" --from-literal=runner-token=""
+secret/runner-secret created
+```
+
+Также понадобится подготовить файл значений values.yaml, для того, чтобы указать в нем количество Runners, время проверки наличия новых задач, настройка логирования, набор правил для доступа к ресурсам Kubernetes, ограничения на ресурсы процессора и памяти.
+
+
+Загружаем Runner из репозитория на ноду control
+
+```
+ubuntu@control:~$ git remote add origin https://github.com/anfilippov7/devops-application.git
+ubuntu@control:~$ git remote -v
+origin  https://github.com/anfilippov7/devops-application.git (fetch)
+origin  https://github.com/anfilippov7/devops-application.git (push)
+ubuntu@control:~$ git pull origin main
+remote: Enumerating objects: 160, done.
+remote: Counting objects: 100% (160/160), done.
+remote: Compressing objects: 100% (117/117), done.
+remote: Total 160 (delta 36), reused 141 (delta 20), pack-reused 0 (from 0)
+Receiving objects: 100% (160/160), 1.26 MiB | 5.43 MiB/s, done.
+Resolving deltas: 100% (36/36), done.
+From https://github.com/anfilippov7/devops-application
+ * branch            main       -> FETCH_HEAD
+ * [new branch]      main       -> origin/main
+```
+
+Приступаем к установке GitLab Runner. Устанавливать будем используя Helm:
+
+```
+ubuntu@control:~$ helm repo add gitlab https://charts.gitlab.io
+"gitlab" has been added to your repositories
+ubuntu@control:~$ helm install gitlab-runner gitlab/gitlab-runner -n gitlab-runner -f helm-runner/values.yaml
+NAME: gitlab-runner
+LAST DEPLOYED: Fri Oct  4 09:29:03 2024
+NAMESPACE: gitlab-runner
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+Your GitLab Runner should now be registered against the GitLab instance reachable at: "https://gitlab.com"
+
+#############################################################################################
+## WARNING: You enabled `rbac` without specifying if a service account should be created.  ##
+## Please set `serviceAccount.create` to either `true` or `false`.                         ##
+## For backwards compatibility a service account will be created.                          ##
+#############################################################################################
+```
+Проверяем результат установки:
+
+```
+ubuntu@control:~$ helm list -n gitlab-runner
+NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
+gitlab-runner   gitlab-runner   1               2024-10-04 09:29:03.408118155 +0000 UTC deployed        gitlab-runner-0.69.0    17.4.0     
+ubuntu@control:~$ kubectl -n gitlab-runner get pods
+NAME                             READY   STATUS    RESTARTS   AGE
+gitlab-runner-7854c6cb4d-kq7bq   1/1     Running   0          8m20s
+```
+
+GitLab Runner установлен и запущен. Также можно через web-интерфейс проверить, подключился ли GitLab Runner к GitLab репозиторию:
+
+<p align="center">
+  <img width="1200" height="600" src="./image/runner.png">
+</p>
+
+Для выполнения GitLab CI/CD необходимо написать код выполнения Pipeline `.gitlab-ci.yml` для автоматической сборки docker image и деплоя приложения при изменении кода:
+
+<details>
+
+```
+stages:
+  - build
+  - push
+  - deploy
+variables:
+  IMAGE_NAME: "crud"
+  DOCKER_IMAGE_TAG: $DOCKER_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  DOCKER_REGISTRY_IMAGE: $DOCKER_REGISTRY_USER/$IMAGE_NAME
+image: docker:latest
+services:
+- docker:dind
+before_script:
+  - docker login -u $DOCKER_REGISTRY_USER -p $DOCKER_ACCESS_TOKEN
+
+Build:
+  stage: build
+  script:
+    - docker pull $DOCKER_REGISTRY_IMAGE:latest || true
+    - >
+      docker build
+      --pull
+      --cache-from $DOCKER_REGISTRY_IMAGE:latest
+      --label "org.opencontainers.image.title=$CI_PROJECT_TITLE"
+      --label "org.opencontainers.image.url=$CI_PROJECT_URL"
+      --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
+      --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
+      --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
+      --tag $DOCKER_IMAGE_TAG
+      .
+
+    - docker push $DOCKER_IMAGE_TAG
+
+Push latest:
+  variables:
+    # We are just playing with Docker here.
+    # We do not need GitLab to clone the source code.
+    GIT_STRATEGY: none
+  stage: push
+  only:
+    # Only "main" should be tagged "latest"
+    - main
+  script:
+    # Because we have no guarantee that this job will be picked up by the same runner
+    # that built the image in the previous step, we pull it again locally
+    - docker pull $DOCKER_IMAGE_TAG
+    # Then we tag it "latest"
+    - docker tag $DOCKER_IMAGE_TAG $DOCKER_REGISTRY_IMAGE:latest
+    # Annnd we push it.
+    - docker push $DOCKER_REGISTRY_IMAGE:latest
+
+Push tag:
+  variables:
+    # Again, we do not need the source code here. Just playing with Docker.
+    GIT_STRATEGY: none
+  stage: push
+  only:
+    # We want this job to be run on tags only.
+    - main
+  script:
+    if [ $CI_COMMIT_TAG == "true" ]; then
+    - docker pull $DOCKER_IMAGE_TAG
+    - docker tag $DOCKER_IMAGE_TAG $DOCKER_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    - docker push $DOCKER_REGISTRY_IMAGE:$CI_COMMIT_TAG ; fi
+
+Deploy:
+  stage: deploy
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""] 
+  only:
+    - main
+  when: manual
+  script:
+    - kubectl apply -f k8s/deployment.yaml -n application
+```
+
+</details>
+
+На первой стадии (build) происходит авторизация в Docker Hub, сборка образа и его публикация в реестре Docker Hub. Сборка образа будет происходить только для main ветки. Docker образ собирается с тегом latest'.
+
+На второй стадии (deploy) будет применяется конфигурационный файл для доступа к кластеру Kubernetes и манифест из git репозитория. Затем перезапускается Deployment для применения обновленного приложения. Эта стадия выполняется только для ветки main и только при условии, что первая стадия build была выполнена успешно.
 
 ---
 ## Что необходимо для сдачи задания?
 
-1. [Репозиторий с конфигурационными файлами Terraform](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/tree/terraform) и готовность продемонстрировать создание всех ресурсов с нуля.
+1. Репозиторий с конфигурационными файлами Terraform и готовность продемонстрировать создание всех ресурсов с нуля.
 2. Пример pull request с комментариями созданными atlantis'ом или снимки экрана из Terraform Cloud или вашего CI-CD-terraform pipeline.
-
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom26.png)
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom27.png)
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom28.png)
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom29.png)
-![Alt_text](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/main/screenshots/diplom30.png)
-
-3. [Репозиторий с конфигурацией ansible](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/tree/kubespray), если был выбран способ создания Kubernetes кластера при помощи ansible.
-4. [Репозиторий с Dockerfile](https://github.com/LeonidKhoroshev/nginx-static) тестового приложения и ссылка на собранный [docker image](https://hub.docker.com/r/leonid1984/nginx-static).
-5. Репозиторий с конфигурацией Kubernetes кластера (в моем случае конфигурация кластера задана в репозитории с [kubespray](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/tree/kubespray) в файле [inventory.ini](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/kubespray/inventory/mycluster/inventory.ini) ).
-6. Ссылка на тестовое приложение и [веб интерфейс Grafana](http://89.169.145.151:32000) с данными доступа: логин - `admin` пароль - `prom-operator`.
-7. Все репозитории рекомендуется хранить на одном ресурсе (github, gitlab).
-
-Дополнительно прилагаю файлы для развертывания `Jenkins` в `k8s`
-
-[deployment.yaml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/jenkins/deployment.yaml)
-
-[namespace.yaml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/jenkins/namespace.yaml)
-
-[pv.yaml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/jenkins/pv.yaml)
-
-[pvc.yaml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/jenkins/pvc.yaml)
-
-[service.yaml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/jenkins/service.yaml)
-
-[serviceAccount.yaml](https://github.com/LeonidKhoroshev/devops-diplom-yandexcloud/blob/jenkins/serviceAccount.yaml)
+3. Репозиторий с конфигурацией ansible, если был выбран способ создания Kubernetes кластера при помощи ansible.
+4. Репозиторий с Dockerfile тестового приложения и ссылка на собранный docker image.
+5. Репозиторий с конфигурацией Kubernetes кластера.
+6. Ссылка на тестовое приложение и веб интерфейс Grafana с данными доступа.
+7. Все репозитории рекомендуется хранить на одном ресурсе (github, gitlab)

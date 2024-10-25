@@ -415,23 +415,21 @@ kubectl get pods -l app=nginx-static
 
 1. Для организации процессов CI/CD воспользуемся функционалом GitLab, создаем репозиторий и отправляем наше приложение в этот репозиторий:
 
-<p align="center">
-  <img width="1200" height="600" src="./image/gitlab.png">
-</p>
+![CI](./assets/CI-1.png)
 
 2. Заливаем приложение в созданный репозиторий GitLab:
 
 ```
-aleksander@aleksander-System-Product-Name:~/devops-application$ git remote add diplom https://gitlab.com/anfilippov7/devops-application.git
-aleksander@aleksander-System-Product-Name:~/devops-application$ git branch -M main
-aleksander@aleksander-System-Product-Name:~/devops-application$ git remote -v
-diplom  https://gitlab.com/anfilippov7/devops-application.git (fetch)
-diplom  https://gitlab.com/anfilippov7/devops-application.git (push)
-origin  https://github.com/anfilippov7/devops-application.git (fetch)
-origin  https://github.com/anfilippov7/devops-application.git (push)
-aleksander@aleksander-System-Product-Name:~/devops-application$ git push -f diplom 
-Username for 'https://gitlab.com': anfilippov7
-Password for 'https://anfilippov7@gitlab.com': 
+root@ubn-serv:~/devops-application$ git remote add diplom https://gitlab.com/caevert/devops-application.git
+root@ubn-serv:~/devops-application$ git branch -M main
+root@ubn-serv:~/devops-application$ git remote -v
+diplom  https://gitlab.com/caevert/devops-application.git (fetch)
+diplom  https://gitlab.com/caevert/devops-application.git (push)
+origin  https://github.com/caevert/devops-application.git (fetch)
+origin  https://github.com/caevert/devops-application.git (push)
+root@ubn-serv:~/devops-application$ git push -f diplom 
+Username for 'https://gitlab.com': caevert
+Password for 'https://caevert@gitlab.com': 
 Перечисление объектов: 156, готово.
 Подсчет объектов: 100% (156/156), готово.
 При сжатии изменений используется до 4 потоков
@@ -439,15 +437,13 @@ Password for 'https://anfilippov7@gitlab.com':
 Запись объектов: 100% (156/156), 1.26 МиБ | 2.63 МиБ/с, готово.
 Всего 156 (изменений 35), повторно использовано 3 (изменений 0), повторно использовано пакетов 0
 remote: Resolving deltas: 100% (35/35), done.
-To https://gitlab.com/anfilippov7/devops-application.git
+To https://gitlab.com/caevert/devops-application.git
  + fae3cab...4972e8c main -> main (forced update)
 ```
 
 3. Проверяем результат на GitLab:
 
-<p align="center">
-  <img width="1200" height="600" src="./image/gitlab2.png">
-</p>
+![CI](./assets/CI-2.png)
 
 4. Для автоматизации процесса CI/CD создаем GitLab Runner, который будет выполнять задачи, указанные в файле .gitlab-ci.yml
 

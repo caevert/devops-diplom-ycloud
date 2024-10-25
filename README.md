@@ -610,6 +610,7 @@ Deploy:
 1. Репозиторий с конфигурационными файлами Terraform и готовность продемонстрировать создание всех ресурсов с нуля.
    [Конфигурация terraform](I.Terraform/)
 2. Пример pull request с комментариями созданными atlantis'ом или снимки экрана из Terraform Cloud или вашего CI-CD-terraform pipeline.
+   
    <details>
 
 ```

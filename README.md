@@ -449,37 +449,35 @@ To https://gitlab.com/caevert/devops-application.git
 
 5. На странице настроек проекта в разделе подключения GitLab Runner создаем Runner. Указанные на странице данные понадобятся для регистрации и аутентификации Runner'а в проекте.
 
-<p align="center">
-  <img width="1200" height="600" src="./image/gitlab3.png">
-</p>
+![CI](./assets/CI-3.png)
 
 6. Выполняем подготовку Kubernetes кластера к установке GitLab Runner'а. Создаем отдельный Namespace, в котором будет располагаться GitLab Runner и создаем Kubernetes secret, который будет использоваться для регистрации установленного в дальнейшем GitLab Runner:
 
 ```
-ubuntu@control:~$ kubectl create namespace gitlab-runner
+ubuntu@master:~$ kubectl create namespace gitlab-runner
 namespace/gitlab-runner created
-ubuntu@control:~$ kubectl --namespace=gitlab-runner create secret generic runner-secret --from-literal=runner-registration-token="glrt-8G79CdQFjRbJKAHvoZs_" --from-literal=runner-token=""
+ubuntu@master:~$ kubectl --namespace=gitlab-runner create secret generic runner-secret --from-literal=runner-registration-token="glrt-8G79CdQFjRbJKAHvoZs_" --from-literal=runner-token=""
 secret/runner-secret created
 ```
 
 Также понадобится подготовить файл значений values.yaml, для того, чтобы указать в нем количество Runners, время проверки наличия новых задач, настройка логирования, набор правил для доступа к ресурсам Kubernetes, ограничения на ресурсы процессора и памяти.
 
 
-Загружаем Runner из репозитория на ноду control
+Загружаем Runner из репозитория на ноду master
 
 ```
-ubuntu@control:~$ git remote add origin https://github.com/anfilippov7/devops-application.git
-ubuntu@control:~$ git remote -v
-origin  https://github.com/anfilippov7/devops-application.git (fetch)
-origin  https://github.com/anfilippov7/devops-application.git (push)
-ubuntu@control:~$ git pull origin main
+ubuntu@master:~$ git remote add origin https://github.com/caevert/devops-application.git
+ubuntu@master:~$ git remote -v
+origin  https://github.com/caevert/devops-application.git (fetch)
+origin  https://github.com/caevert/devops-application.git (push)
+ubuntu@master:~$ git pull origin main
 remote: Enumerating objects: 160, done.
 remote: Counting objects: 100% (160/160), done.
 remote: Compressing objects: 100% (117/117), done.
 remote: Total 160 (delta 36), reused 141 (delta 20), pack-reused 0 (from 0)
 Receiving objects: 100% (160/160), 1.26 MiB | 5.43 MiB/s, done.
 Resolving deltas: 100% (36/36), done.
-From https://github.com/anfilippov7/devops-application
+From https://github.com/caevert/devops-application
  * branch            main       -> FETCH_HEAD
  * [new branch]      main       -> origin/main
 ```
@@ -487,11 +485,11 @@ From https://github.com/anfilippov7/devops-application
 Приступаем к установке GitLab Runner. Устанавливать будем используя Helm:
 
 ```
-ubuntu@control:~$ helm repo add gitlab https://charts.gitlab.io
+ubuntu@master:~$ helm repo add gitlab https://charts.gitlab.io
 "gitlab" has been added to your repositories
-ubuntu@control:~$ helm install gitlab-runner gitlab/gitlab-runner -n gitlab-runner -f helm-runner/values.yaml
+ubuntu@master:~$ helm install gitlab-runner gitlab/gitlab-runner -n gitlab-runner -f helm-runner/values.yaml
 NAME: gitlab-runner
-LAST DEPLOYED: Fri Oct  4 09:29:03 2024
+LAST DEPLOYED: Fri Oct  25 09:29:03 2024
 NAMESPACE: gitlab-runner
 STATUS: deployed
 REVISION: 1
@@ -508,9 +506,9 @@ Your GitLab Runner should now be registered against the GitLab instance reachabl
 Проверяем результат установки:
 
 ```
-ubuntu@control:~$ helm list -n gitlab-runner
+ubuntu@master:~$ helm list -n gitlab-runner
 NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
-gitlab-runner   gitlab-runner   1               2024-10-04 09:29:03.408118155 +0000 UTC deployed        gitlab-runner-0.69.0    17.4.0     
+gitlab-runner   gitlab-runner   1               2024-10-25 09:29:03.408118155 +0000 UTC deployed        gitlab-runner-0.69.0    17.4.0     
 ubuntu@control:~$ kubectl -n gitlab-runner get pods
 NAME                             READY   STATUS    RESTARTS   AGE
 gitlab-runner-7854c6cb4d-kq7bq   1/1     Running   0          8m20s
@@ -518,10 +516,7 @@ gitlab-runner-7854c6cb4d-kq7bq   1/1     Running   0          8m20s
 
 GitLab Runner установлен и запущен. Также можно через web-интерфейс проверить, подключился ли GitLab Runner к GitLab репозиторию:
 
-<p align="center">
-  <img width="1200" height="600" src="./image/runner.png">
-</p>
-
+![CI](./assets/CI-4.png)
 Для выполнения GitLab CI/CD необходимо написать код выполнения Pipeline `.gitlab-ci.yml` для автоматической сборки docker image и деплоя приложения при изменении кода:
 
 <details>

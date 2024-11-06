@@ -63,9 +63,9 @@ VMS in YC
 +----------------------+--------+---------------+---------+----------------+----------------+
 |          ID          |  NAME  |    ZONE ID    | STATUS  |  EXTERNAL IP   |  INTERNAL IP   |
 +----------------------+--------+---------------+---------+----------------+----------------+
-| epdjehfpdpfalutkuep9 | slave2 | ru-central1-b | RUNNING | 158.160.12.225 | 192.168.200.14 |
-| fhm2630o4n2btldi565o | slave1 | ru-central1-a | RUNNING | 89.169.143.31  | 192.168.100.20 |
-| fv485411t4bqp5mff2dt | master | ru-central1-d | RUNNING | 84.252.135.85  | 192.168.10.100 |
+| epdjehfpdpfalutkuep9 | slave2 | ru-central1-b | RUNNING | 130.193.52.80  | 192.168.200.20 |
+| fhm2630o4n2btldi565o | slave1 | ru-central1-a | RUNNING | 89.169.134.212 | 192.168.100.34 |
+| fv485411t4bqp5mff2dt | master | ru-central1-d | RUNNING | 84.252.133.212 | 192.168.10.100 |
 ```
 [Конфигурация terraform](I.Terraform/)
 

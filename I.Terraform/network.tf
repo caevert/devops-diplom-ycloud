@@ -1,6 +1,6 @@
 ### Разворачиваем VPC
 resource "yandex_vpc_network" "diplom-vpc2" {
-  name        = "diplom-vpc"
+  name        = "diplom-vpc2"
   description = "My diplom project vpc"
 }
 
